@@ -20,8 +20,7 @@ SaveManager = {
     LoadingOrder = {},
     UseLoadingOrder = false,
     AutoloadConfig = nil
-}
-
+            }
 function SaveManager:SetLibrary(Library) SaveManager.Library = Library end
 
 local SpecialValueParser = {
@@ -57,8 +56,7 @@ local ElementParser = {}; do
     CreateParser("ColorPicker", "Options",
         function(Index, ColorPicker) return { value = ColorPicker.Value:ToHex(), transparency = ColorPicker.Transparency } end,
         function(Element, Data) if not Element then return end Element:SetValueRGB(Color3.fromHex(Data.value), Data.transparency) end
-    )
-
+                )
     CreateParser("KeyPicker", "Options",
         function(Index, KeyPicker) return { mode = KeyPicker.Mode, key = KeyPicker.Value, modifiers = KeyPicker.Modifiers, toggled = KeyPicker.Toggled } end,
         function(Element, Data) if not Element then return end Element:SetValue({ Data.key, Data.mode, Data.modifiers }) if Data.mode == "Toggle" and Data.toggled ~= nil then Element.Toggled = Data.toggled Element:Update() end end
@@ -152,7 +150,8 @@ function SaveManager:Save(ConfigName)
     local SuccessWrite, ErrorMessage = pcall(writefile, ConfigPath, EncodedData)
     if not SuccessWrite then return false, "写入配置文件失败：" .. tostring(ErrorMessage) end
     return true
-                                            end
+end
+
 function SaveManager:LoadJSON(Content)
     if IsStringEmpty(Content) then return false, "未提供 JSON" end
     local SuccessDecode, Decoded = pcall(HttpService.JSONDecode, HttpService, Content)
@@ -180,8 +179,7 @@ function SaveManager:LoadJSON(Content)
         task.defer(Parser.Load, Option.idx, Option)
     end
     return true
-end
-
+                                            end
 function SaveManager:Load(ConfigName)
     if IsStringEmpty(ConfigName) then return false, "未选择配置" end
     local ConfigPath = GetConfigPath(ConfigName)
@@ -199,7 +197,8 @@ function SaveManager:Delete(ConfigName)
     if not SuccessDelete then return false, "删除配置文件失败：" .. tostring(ErrorMessage) end
     if ConfigName == SaveManager.AutoloadConfig then SaveManager:DeleteAutoLoadConfig() end
     return true
-                                            end
+end
+
 function SaveManager:GetAutoloadConfig()
     SaveManager:CheckFolderTree()
     local AutoloadPath = GetAutoloadPath()
@@ -346,7 +345,6 @@ function SaveManager:BuildConfigSection(Tab, IconName)
         )
     end })
     ConfigurationBox:AddButton("刷新列表", RefreshList)
-
     ConfigurationBox:AddButton({ Text = "设为自动加载", DoubleClick = false, Func = function()
         local ConfigName = ConfigList.Value
         if IsStringEmpty(ConfigName) then SaveManager.Library:Notify("请先选择一个配置。") return end
