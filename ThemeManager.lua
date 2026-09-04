@@ -50,8 +50,7 @@ ThemeManager = {
         ["Oceanic Next"] = { 17, { FontColor = "d8dee9", MainColor = "1b2b34", AccentColor = "6699cc", BackgroundColor = "16232a", OutlineColor = "343d46", BackgroundImage = "" } },
         ["Material"] = { 18, { FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242", BackgroundImage = "" } }
     }
-}
-
+            }
 function ThemeManager:SetLibrary(Library) ThemeManager.Library = Library end
 
 local function Trim(Text) return Text:match("^%s*(.-)%s*$") end
@@ -62,6 +61,7 @@ local function LinearizeChannel(Channel) if Channel <= SrgbLinearThreshold then 
 local function GetRelativeLuminance(Color) local R = LinearizeChannel(Color.R) local G = LinearizeChannel(Color.G) local B = LinearizeChannel(Color.B) return LuminanceRedWeight * R + LuminanceGreenWeight * G + LuminanceBlueWeight * B end
 local function GetContrastRatio(ColorA, ColorB) local LuminanceA = GetRelativeLuminance(ColorA) local LuminanceB = GetRelativeLuminance(ColorB) local Lighter = math.max(LuminanceA, LuminanceB) local Darker = math.min(LuminanceA, LuminanceB) return (Lighter + ContrastRatioOffset) / (Darker + ContrastRatioOffset) end
 local function IsValidThemeData(Data) if typeof(Data) ~= "table" then return false end for _, SchemeIndex in SchemeIndexes do if typeof(Data[SchemeIndex]) ~= "string" then return false end end return true end
+
 local function SplitPath(Path) local Result = {} local Current = "" for Part in string.gmatch(Path, "[^/]+") do Current = if Current == "" then Part else (Current .. "/" .. Part) table.insert(Result, Current) end return Result end
 local function GetFolderPath() if IsStringEmpty(ThemeManager.Folder) then return false end return string.format("%s/themes", ThemeManager.Folder) end
 local GetCurrentThemesPath = GetFolderPath
@@ -73,7 +73,6 @@ function ThemeManager:GetPaths() local FolderPath = GetFolderPath() return if Fo
 function ThemeManager:BuildFolderTree(SkipWhenCreated) local Paths = ThemeManager:GetPaths() if #Paths == 0 then return false end if SkipWhenCreated == true then if isfolder(Paths[1]) then return true end end for _, Path in Paths do if isfolder(Path) then continue end makefolder(Path) end return true end
 function ThemeManager:CheckFolderTree() return ThemeManager:BuildFolderTree(true) end
 function ThemeManager:SetFolder(Folder) assert(IsValidFolderPath(Folder), "提供的路径无效") ThemeManager.Folder = Folder ThemeManager:BuildFolderTree() end
-
 function ThemeManager:ReloadCustomThemes()
     local SettingsPath = GetCurrentThemesPath()
     if SettingsPath == false then return {} end
@@ -130,7 +129,7 @@ function ThemeManager:Delete(ThemeName)
     if not SuccessDelete then return false, "删除主题文件失败：" .. tostring(ErrorMessage) end
     if ThemeName == ThemeManager.DefaultThemeName then ThemeManager:DeleteDefaultTheme() end
     return true
-end
+                                    end
 function ThemeManager:GetDefaultTheme()
     ThemeManager:CheckFolderTree()
     local DefaultThemePath = GetDefaultThemePath()
@@ -222,8 +221,7 @@ function ThemeManager:DeleteDefaultTheme()
     if not SuccessDelete then return false, ErrorMessage end
     ThemeManager.DefaultThemeName = nil
     return true
-end
-
+                                        end
 function ThemeManager:GetContrastReport()
     local Library = ThemeManager.Library
     local FontColorOption = Library.Options.FontColor
@@ -264,6 +262,7 @@ function ThemeManager:UpdateContrastWarning()
     end
     ThemeManager.ContrastWasPoor = not Report.Passes
 end
+
 function ThemeManager:ThemeUpdate()
     local Library = ThemeManager.Library
     for _, SchemeIndex in SchemeIndexes do local Element = Library.Options[SchemeIndex] if not Element then continue end Library.Scheme[SchemeIndex] = Element.Value end
@@ -319,7 +318,7 @@ function ThemeManager:LoadJSON(Content)
     local SuccessDecode, Decoded = pcall(HttpService.JSONDecode, HttpService, Content)
     if not SuccessDecode or not IsValidThemeData(Decoded) then return false, "解码主题数据失败" end
     return ThemeManager:ApplyThemeData(Decoded)
-end
+                                        end
 local function ShowDialog(Condition, Index, Title, Description, DestructiveText, DestructiveAction)
     if Condition() == false then return DestructiveAction() end
     return ThemeManager.Library.Window:AddDialog(Index, {
@@ -366,81 +365,82 @@ function ThemeManager:CreateThemeManager(Themesbox)
     Themesbox:AddButton("设为默认", function() local ThemeName = ThemeList.Value ThemeManager:SaveDefault(ThemeName) ThemeManager.Library:Notify(string.format("成功设置默认主题为 %q", ThemeName)) RefreshDefaultThemeLabel() end)
     Themesbox:AddDivider()
     CustomThemeName = Themesbox:AddInput("ThemeManager_CustomThemeName", { Text = "自定义主题名称" })
-local function SaveThemeWithContrastCheck(Name, SuccessMessage, OnSaved)
-    local function DoSave()
-        local Success, ErrorMessage = ThemeManager:SaveCustomTheme(Name)
-        if not Success then ThemeManager.Library:Notify(string.format("保存主题 %q 失败：%s", Name, ErrorMessage)) return end
-        ThemeManager.Library:Notify(string.format(SuccessMessage, Name))
-        if OnSaved then OnSaved() end
-    end
-    local Report = ThemeManager:GetContrastReport()
-    if Report.Passes then DoSave() return end
-    ShowDialog(
-        function() return true end,
-        "ThemeManager_LowContrastSave", "低对比度主题",
-        string.format("此主题的对比度为 %.1f:1（在 %s 之间），低于建议的 %.1f:1。文本可能难以阅读。仍然保存吗？", Report.Ratio, Report.PairName, ContrastWarnThreshold),
-        "仍然保存", DoSave
-    )
-end
 
-Themesbox:AddButton("创建主题", function()
-    local Name = CustomThemeName.Value
-    if IsStringEmpty(Name) then ThemeManager.Library:Notify("主题名称不能为空。") return end
-    if string.lower(Name) == "default" then ThemeManager.Library:Notify("提供的主题名称无效。") return end
-    ShowDialog(
-        function() return ThemeManager:GetCustomTheme(Name) ~= nil end,
-        "ThemeManager_CreateTheme", "主题已存在",
-        string.format("名为 %q 的自定义主题已存在。覆盖将用当前颜色替换它。", Name),
-        "覆盖",
-        function() SaveThemeWithContrastCheck(Name, "成功创建主题 %q", RefreshList) end
-    )
-end)
-Themesbox:AddDivider()
-
-CustomThemeList = Themesbox:AddDropdown("ThemeManager_CustomThemeList", {
-    Text = "自定义主题",
-    Values = ThemeManager:ReloadCustomThemes(),
-    AllowNull = true,
-    Multi = false,
-    FormatDisplayValue = function(Value) if Value == ThemeManager.DefaultThemeName then return string.format("%s (默认)", Value) end return Value end,
-    FormatListValue = function(Value) if Value == ThemeManager.DefaultThemeName then return string.format("%s (默认)", Value) end return Value end
-})
-
-Themesbox:AddButton("加载主题", function()
-    local Name = CustomThemeList.Value
-    if IsStringEmpty(Name) then ThemeManager.Library:Notify("请先选择一个主题。") return end
-    ThemeManager:ApplyTheme(Name)
-    ThemeManager.Library:Notify(string.format("成功加载主题 %q", Name))
-end)
-
-Themesbox:AddButton("覆盖主题", function()
-    local Name = CustomThemeList.Value
-    if IsStringEmpty(Name) then ThemeManager.Library:Notify("请先选择一个主题。") return end
-    ShowDialog(
-        function() return true end,
-        "ThemeManager_OverwriteTheme", "覆盖主题",
-        string.format("确定要用当前颜色覆盖 %q 吗？此操作不可撤销。", Name),
-        "覆盖",
-        function() SaveThemeWithContrastCheck(Name, "成功覆盖主题 %q") end
-    )
-end)
-
-Themesbox:AddButton("删除主题", function()
-    local Name = CustomThemeList.Value
-    if IsStringEmpty(Name) then ThemeManager.Library:Notify("请先选择一个主题。") return end
-    ShowDialog(
-        function() return true end,
-        "ThemeManager_DeleteTheme", "删除主题",
-        string.format("确定要删除 %q 吗？此操作不可撤销。", Name),
-        "删除",
-        function()
-            local Success, ErrorMessage = ThemeManager:Delete(Name)
-            if not Success then ThemeManager.Library:Notify(string.format("删除主题失败：%s", ErrorMessage)) return end
-            ThemeManager.Library:Notify(string.format("成功删除主题 %q", Name))
-            RefreshDefaultThemeLabel()
+    local function SaveThemeWithContrastCheck(Name, SuccessMessage, OnSaved)
+        local function DoSave()
+            local Success, ErrorMessage = ThemeManager:SaveCustomTheme(Name)
+            if not Success then ThemeManager.Library:Notify(string.format("保存主题 %q 失败：%s", Name, ErrorMessage)) return end
+            ThemeManager.Library:Notify(string.format(SuccessMessage, Name))
+            if OnSaved then OnSaved() end
         end
-    )
-end)
+        local Report = ThemeManager:GetContrastReport()
+        if Report.Passes then DoSave() return end
+        ShowDialog(
+            function() return true end,
+            "ThemeManager_LowContrastSave", "低对比度主题",
+            string.format("此主题的对比度为 %.1f:1（在 %s 之间），低于建议的 %.1f:1。文本可能难以阅读。仍然保存吗？", Report.Ratio, Report.PairName, ContrastWarnThreshold),
+            "仍然保存", DoSave
+        )
+    end
+
+    Themesbox:AddButton("创建主题", function()
+        local Name = CustomThemeName.Value
+        if IsStringEmpty(Name) then ThemeManager.Library:Notify("主题名称不能为空。") return end
+        if string.lower(Name) == "default" then ThemeManager.Library:Notify("提供的主题名称无效。") return end
+        ShowDialog(
+            function() return ThemeManager:GetCustomTheme(Name) ~= nil end,
+            "ThemeManager_CreateTheme", "主题已存在",
+            string.format("名为 %q 的自定义主题已存在。覆盖将用当前颜色替换它。", Name),
+            "覆盖",
+            function() SaveThemeWithContrastCheck(Name, "成功创建主题 %q", RefreshList) end
+        )
+    end)
+    Themesbox:AddDivider()
+
+    CustomThemeList = Themesbox:AddDropdown("ThemeManager_CustomThemeList", {
+        Text = "自定义主题",
+        Values = ThemeManager:ReloadCustomThemes(),
+        AllowNull = true,
+        Multi = false,
+        FormatDisplayValue = function(Value) if Value == ThemeManager.DefaultThemeName then return string.format("%s (默认)", Value) end return Value end,
+        FormatListValue = function(Value) if Value == ThemeManager.DefaultThemeName then return string.format("%s (默认)", Value) end return Value end
+    })
+
+    Themesbox:AddButton("加载主题", function()
+        local Name = CustomThemeList.Value
+        if IsStringEmpty(Name) then ThemeManager.Library:Notify("请先选择一个主题。") return end
+        ThemeManager:ApplyTheme(Name)
+        ThemeManager.Library:Notify(string.format("成功加载主题 %q", Name))
+    end)
+
+    Themesbox:AddButton("覆盖主题", function()
+        local Name = CustomThemeList.Value
+        if IsStringEmpty(Name) then ThemeManager.Library:Notify("请先选择一个主题。") return end
+        ShowDialog(
+            function() return true end,
+            "ThemeManager_OverwriteTheme", "覆盖主题",
+            string.format("确定要用当前颜色覆盖 %q 吗？此操作不可撤销。", Name),
+            "覆盖",
+            function() SaveThemeWithContrastCheck(Name, "成功覆盖主题 %q") end
+        )
+    end)
+    Themesbox:AddButton("删除主题", function()
+        local Name = CustomThemeList.Value
+        if IsStringEmpty(Name) then ThemeManager.Library:Notify("请先选择一个主题。") return end
+        ShowDialog(
+            function() return true end,
+            "ThemeManager_DeleteTheme", "删除主题",
+            string.format("确定要删除 %q 吗？此操作不可撤销。", Name),
+            "删除",
+            function()
+                local Success, ErrorMessage = ThemeManager:Delete(Name)
+                if not Success then ThemeManager.Library:Notify(string.format("删除主题失败：%s", ErrorMessage)) return end
+                ThemeManager.Library:Notify(string.format("成功删除主题 %q", Name))
+                RefreshDefaultThemeLabel()
+            end
+        )
+    end)
+
     Themesbox:AddButton("刷新列表", RefreshList)
     Themesbox:AddButton("设为默认", function()
         local Name = CustomThemeList.Value
@@ -519,3 +519,4 @@ function ThemeManager:CreateGroupBox(Tab, IconName) return Tab:AddGroupbox({ Sid
 function ThemeManager:ApplyToTab(Tab, IconName) local Groupbox = ThemeManager:CreateGroupBox(Tab, IconName) return ThemeManager:CreateThemeManager(Groupbox) end
 function ThemeManager:ApplyToGroupbox(Groupbox) return ThemeManager:CreateThemeManager(Groupbox) end
 getgenv().ObsidianThemeManager = ThemeManager
+return ThemeManager
