@@ -80,7 +80,7 @@ local ElementParser = {}; do
         function(_, Data) local TabIndex, Index = Data.tabIdx, Data.idx if typeof(TabIndex) ~= "string" or typeof(Index) ~= "string" then return end local Tabs = SaveManager.Library and SaveManager.Library.Tabs local Tab = Tabs and Tabs[TabIndex] if not Tab then return end local Tabbox = Tab.Tabboxes and Tab.Tabboxes[Index] if not Tabbox then return end if Tabbox.PopOutEnabled then if Data.poppedOut == true then local Position = SpecialValueParser.UDim2.Decode(Data.popoutPos) Tabbox:SetPoppedOut(true, Position) elseif Tabbox.PoppedOut then Tabbox:SetPoppedOut(false) end end end,
         true
     )
-end
+            end
 local function Trim(Text) return Text:match("^%s*(.-)%s*$") end
 local function IsStringEmpty(String) return if typeof(String) == "string" then Trim(String) == "" else true end
 local function IsValidFolderPath(Name) return typeof(Name) == "string" and (Trim(Name) ~= "" and not Name:match("^%s*$") and not Name:find('[<>:"|%?%*%z]')) end
@@ -152,7 +152,7 @@ function SaveManager:Save(ConfigName)
     local SuccessWrite, ErrorMessage = pcall(writefile, ConfigPath, EncodedData)
     if not SuccessWrite then return false, "写入配置文件失败：" .. tostring(ErrorMessage) end
     return true
-end
+                                            end
 function SaveManager:LoadJSON(Content)
     if IsStringEmpty(Content) then return false, "未提供 JSON" end
     local SuccessDecode, Decoded = pcall(HttpService.JSONDecode, HttpService, Content)
@@ -199,7 +199,7 @@ function SaveManager:Delete(ConfigName)
     if not SuccessDelete then return false, "删除配置文件失败：" .. tostring(ErrorMessage) end
     if ConfigName == SaveManager.AutoloadConfig then SaveManager:DeleteAutoLoadConfig() end
     return true
-end
+                                            end
 function SaveManager:GetAutoloadConfig()
     SaveManager:CheckFolderTree()
     local AutoloadPath = GetAutoloadPath()
@@ -245,7 +245,7 @@ function SaveManager:DeleteAutoLoadConfig()
     if not SuccessDelete then return false, ErrorMessage end
     SaveManager.AutoloadConfig = nil
     return true
-end
+                                            end
 local function ShowDialog(Condition, Index, Title, Description, DestructiveText, DestructiveAction)
     if Condition() == false then return DestructiveAction() end
     return SaveManager.Library.Window:AddDialog(Index, {
@@ -298,6 +298,7 @@ function SaveManager:BuildConfigSection(Tab, IconName)
         FormatDisplayValue = function(Value) if Value == SaveManager.AutoloadConfig then return string.format("%s (自动加载)", Value) end return Value end,
         FormatListValue = function(Value) if Value == SaveManager.AutoloadConfig then return string.format("%s (自动加载)", Value) end return Value end
     })
+
     ConfigurationBox:AddButton({ Text = "加载配置", DoubleClick = false, Func = function()
         local ConfigName = ConfigList.Value
         if IsStringEmpty(ConfigName) then SaveManager.Library:Notify("请先选择一个配置。") return end
@@ -401,3 +402,4 @@ function SaveManager:BuildConfigSection(Tab, IconName)
 end
 
 SaveManager:BuildFolderTree()
+return SaveManager
