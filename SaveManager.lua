@@ -20,7 +20,8 @@ SaveManager = {
     LoadingOrder = {},
     UseLoadingOrder = false,
     AutoloadConfig = nil
-            }
+}
+
 function SaveManager:SetLibrary(Library) SaveManager.Library = Library end
 
 local SpecialValueParser = {
@@ -56,7 +57,7 @@ local ElementParser = {}; do
     CreateParser("ColorPicker", "Options",
         function(Index, ColorPicker) return { value = ColorPicker.Value:ToHex(), transparency = ColorPicker.Transparency } end,
         function(Element, Data) if not Element then return end Element:SetValueRGB(Color3.fromHex(Data.value), Data.transparency) end
-                )
+    )
     CreateParser("KeyPicker", "Options",
         function(Index, KeyPicker) return { mode = KeyPicker.Mode, key = KeyPicker.Value, modifiers = KeyPicker.Modifiers, toggled = KeyPicker.Toggled } end,
         function(Element, Data) if not Element then return end Element:SetValue({ Data.key, Data.mode, Data.modifiers }) if Data.mode == "Toggle" and Data.toggled ~= nil then Element.Toggled = Data.toggled Element:Update() end end
@@ -78,7 +79,8 @@ local ElementParser = {}; do
         function(_, Data) local TabIndex, Index = Data.tabIdx, Data.idx if typeof(TabIndex) ~= "string" or typeof(Index) ~= "string" then return end local Tabs = SaveManager.Library and SaveManager.Library.Tabs local Tab = Tabs and Tabs[TabIndex] if not Tab then return end local Tabbox = Tab.Tabboxes and Tab.Tabboxes[Index] if not Tabbox then return end if Tabbox.PopOutEnabled then if Data.poppedOut == true then local Position = SpecialValueParser.UDim2.Decode(Data.popoutPos) Tabbox:SetPoppedOut(true, Position) elseif Tabbox.PoppedOut then Tabbox:SetPoppedOut(false) end end end,
         true
     )
-            end
+end
+
 local function Trim(Text) return Text:match("^%s*(.-)%s*$") end
 local function IsStringEmpty(String) return if typeof(String) == "string" then Trim(String) == "" else true end
 local function IsValidFolderPath(Name) return typeof(Name) == "string" and (Trim(Name) ~= "" and not Name:match("^%s*$") and not Name:find('[<>:"|%?%*%z]')) end
@@ -87,7 +89,6 @@ local function SplitPath(Path) local Result = {} local Current = "" for Part in 
 local function GetFolderPath() if IsStringEmpty(SaveManager.Folder) then return false end return string.format("%s/settings", SaveManager.Folder) end
 local function GetSubFolderPath() if IsStringEmpty(SaveManager.Folder) or IsStringEmpty(SaveManager.SubFolder) then return false end return string.format("%s/settings/%s", SaveManager.Folder, SaveManager.SubFolder) end
 local function GetCurrentSettingsPath() local SubFolderPath = GetSubFolderPath() return if SubFolderPath == false then GetFolderPath() else SubFolderPath end
-
 local function GetConfigPath(ConfigName) local CurrentSettingsPath = GetCurrentSettingsPath() return if CurrentSettingsPath == false then false else string.format("%s/%s.json", CurrentSettingsPath, ConfigName) end
 local function DoesConfigExist(ConfigName) local ConfigPath = GetConfigPath(ConfigName) return if ConfigPath == false then false else isfile(ConfigPath) end
 local function GetAutoloadPath() local CurrentSettingsPath = GetCurrentSettingsPath() return if CurrentSettingsPath == false then false else string.format("%s/autoload.txt", CurrentSettingsPath) end
@@ -102,6 +103,7 @@ function SaveManager:CheckFolderTree() return SaveManager:BuildFolderTree(true) 
 function SaveManager:CheckSubFolder(CreateFolder) local SubFolderPath = GetSubFolderPath() if SubFolderPath == false then return false end local FolderExists = isfolder(SubFolderPath) if not CreateFolder then return FolderExists end makefolder(SubFolderPath) return true end
 function SaveManager:SetFolder(Folder) assert(IsValidFolderPath(Folder), "提供的路径无效") SaveManager.Folder = Folder SaveManager:BuildFolderTree() end
 function SaveManager:SetSubFolder(SubFolder) assert(IsValidFolderPath(SubFolder), "提供的路径无效") SaveManager.SubFolder = SubFolder SaveManager:BuildFolderTree() end
+
 function SaveManager:RefreshConfigList()
     local SettingsPath = GetCurrentSettingsPath()
     if SettingsPath == false then return {} end
@@ -118,7 +120,6 @@ function SaveManager:RefreshConfigList()
     end
     return FileNames
 end
-
 function SaveManager:SaveJSON(ConfigName)
     local Library = SaveManager.Library
     local IgnoreIndexes = SaveManager.Ignore
@@ -151,7 +152,6 @@ function SaveManager:Save(ConfigName)
     if not SuccessWrite then return false, "写入配置文件失败：" .. tostring(ErrorMessage) end
     return true
 end
-
 function SaveManager:LoadJSON(Content)
     if IsStringEmpty(Content) then return false, "未提供 JSON" end
     local SuccessDecode, Decoded = pcall(HttpService.JSONDecode, HttpService, Content)
@@ -179,7 +179,8 @@ function SaveManager:LoadJSON(Content)
         task.defer(Parser.Load, Option.idx, Option)
     end
     return true
-                                            end
+end
+
 function SaveManager:Load(ConfigName)
     if IsStringEmpty(ConfigName) then return false, "未选择配置" end
     local ConfigPath = GetConfigPath(ConfigName)
@@ -188,7 +189,6 @@ function SaveManager:Load(ConfigName)
     if not SuccessRead then return false, "读取配置文件失败" end
     return SaveManager:LoadJSON(Content)
 end
-
 function SaveManager:Delete(ConfigName)
     if IsStringEmpty(ConfigName) then return false, "未选择配置" end
     local ConfigPath = GetConfigPath(ConfigName)
@@ -234,7 +234,6 @@ function SaveManager:LoadAutoloadConfig()
     if not SuccessLoad then SaveManager.Library:Notify(string.format("加载自动加载配置失败：%s", LoadErrorMessage)) return end
     SaveManager.Library:Notify(string.format("成功加载自动加载配置 %q", ConfigName))
 end
-
 function SaveManager:DeleteAutoLoadConfig()
     SaveManager:CheckFolderTree()
     local AutoloadPath = GetAutoloadPath()
@@ -244,7 +243,8 @@ function SaveManager:DeleteAutoLoadConfig()
     if not SuccessDelete then return false, ErrorMessage end
     SaveManager.AutoloadConfig = nil
     return true
-                                            end
+end
+
 local function ShowDialog(Condition, Index, Title, Description, DestructiveText, DestructiveAction)
     if Condition() == false then return DestructiveAction() end
     return SaveManager.Library.Window:AddDialog(Index, {
@@ -297,7 +297,6 @@ function SaveManager:BuildConfigSection(Tab, IconName)
         FormatDisplayValue = function(Value) if Value == SaveManager.AutoloadConfig then return string.format("%s (自动加载)", Value) end return Value end,
         FormatListValue = function(Value) if Value == SaveManager.AutoloadConfig then return string.format("%s (自动加载)", Value) end return Value end
     })
-
     ConfigurationBox:AddButton({ Text = "加载配置", DoubleClick = false, Func = function()
         local ConfigName = ConfigList.Value
         if IsStringEmpty(ConfigName) then SaveManager.Library:Notify("请先选择一个配置。") return end
@@ -345,6 +344,7 @@ function SaveManager:BuildConfigSection(Tab, IconName)
         )
     end })
     ConfigurationBox:AddButton("刷新列表", RefreshList)
+
     ConfigurationBox:AddButton({ Text = "设为自动加载", DoubleClick = false, Func = function()
         local ConfigName = ConfigList.Value
         if IsStringEmpty(ConfigName) then SaveManager.Library:Notify("请先选择一个配置。") return end
