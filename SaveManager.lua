@@ -746,7 +746,7 @@ function SaveManager:BuildConfigSection(Tab: any, IconName: string)
     local ConfigurationBox = Tab:AddGroupbox({
         Side = "Right",
         Name = "配置",
-        IconName = IconName or "folder-cog",
+        IconName = IconName or "folder",
     })
 
     local ConfigNameInput, ConfigList, ConfigJSONInput, AutoloadConfigLabel
