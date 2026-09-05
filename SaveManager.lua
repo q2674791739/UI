@@ -1,4 +1,3 @@
--- 原作者: deividcomsono (https://github.com/deividcomsono/Obsidian) 汉化修改版本
 local cloneref = (cloneref or clonereference or function(instance: any)
     return instance
 end)
