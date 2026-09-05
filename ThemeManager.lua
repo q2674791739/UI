@@ -255,9 +255,6 @@ function ThemeManager:UpdateContrastWarning()
         ContrastLabel:SetText(string.format("对比度低 (%.1f:1)，在 %s 之间。目标至少 %.1f:1 以便文本保持可读。", Report.Ratio, Report.PairName, ContrastWarnThreshold))
         TextLabel.TextColor3 = Library.Scheme.RedColor
         Library.Registry[TextLabel].TextColor3 = "RedColor"
-        if not ThemeManager.ContrastWasPoor then
-            Library:Notify({ Title = "低对比度主题", Description = string.format("您的 %s 对比度为 %.1f:1，低于建议的 %.1f:1。文本可能难以阅读。", Report.PairName, Report.Ratio, ContrastWarnThreshold), Time = 10 })
-        end
     end
     ThemeManager.ContrastWasPoor = not Report.Passes
 end
