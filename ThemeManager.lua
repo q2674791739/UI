@@ -511,7 +511,7 @@ function ThemeManager:CreateThemeManager(Themesbox)
     return Themesbox
 end
 
-function ThemeManager:CreateGroupBox(Tab, IconName) return Tab:AddGroupbox({ Side = "Left", Name = "主题", IconName = IconName or "paintbrush", }) end
+function ThemeManager:CreateGroupBox(Tab, IconName) return Tab:AddGroupbox({ Side = "Left", Name = "主题", IconName = IconName or "palette", }) end
 function ThemeManager:ApplyToTab(Tab, IconName) local Groupbox = ThemeManager:CreateGroupBox(Tab, IconName) return ThemeManager:CreateThemeManager(Groupbox) end
 function ThemeManager:ApplyToGroupbox(Groupbox) return ThemeManager:CreateThemeManager(Groupbox) end
 getgenv().ObsidianThemeManager = ThemeManager
