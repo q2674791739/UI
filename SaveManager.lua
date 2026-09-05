@@ -96,137 +96,135 @@ local ElementParser = {}; do
             end
         }
     end
-
-    CreateParser(
-        "Toggle", "Toggles",
-        function(Index: string, Toggle: any)
-            return { value = Toggle.Value }
-        end,
-        function(Element: any?, Data: any)
-            if not Element then return end
-            if Element.Value == Data.value then
-                Element:RunChanged()
-                return
-            end
-            
-            Element:SetValue(Data.value)
+ CreateParser(
+    "Toggle", "Toggles",
+    function(Index: string, Toggle: any)
+        return { value = Toggle.Value }
+    end,
+    function(Element: any?, Data: any)
+        if not Element then return end
+        if Element.Value == Data.value then
+            Element:RunChanged()
+            return
         end
-    )
+        
+        Element:SetValue(Data.value)
+    end
+)
 
-    CreateParser(
-        "Slider", "Options",
-        function(Index: string, Slider: any)
-            return { value = tostring(Slider.Value) }
-        end,
-        function(Element: any?, Data: any)
-            if not Element then return end
-            if Element.Value == Data.value then
-                Element:RunChanged()
-                return
-            end
-
-            Element:SetValue(Data.value)
+CreateParser(
+    "Slider", "Options",
+    function(Index: string, Slider: any)
+        return { value = tostring(Slider.Value) }
+    end,
+    function(Element: any?, Data: any)
+        if not Element then return end
+        if Element.Value == Data.value then
+            Element:RunChanged()
+            return
         end
-    )
 
-    CreateParser(
-        "Dropdown", "Options",
-        function(Index: string, Dropdown: any)
-            return { value = Dropdown.Value, multi = Dropdown.Multi }
-        end,
-        function(Element: any?, Data: any)
-            if not Element then return end
-            if Element.Value == Data.value then
-                Element:RunChanged()
-                return
-            end
-            
-            Element:SetValue(Data.value)
+        Element:SetValue(Data.value)
+    end
+)
+
+CreateParser(
+    "Dropdown", "Options",
+    function(Index: string, Dropdown: any)
+        return { value = Dropdown.Value, multi = Dropdown.Multi }
+    end,
+    function(Element: any?, Data: any)
+        if not Element then return end
+        if Element.Value == Data.value then
+            Element:RunChanged()
+            return
         end
-    )
+        
+        Element:SetValue(Data.value)
+    end
+)
 
-    CreateParser(
-        "ColorPicker", "Options",
-        function(Index: string, ColorPicker: any)
-            return { value = ColorPicker.Value:ToHex(), transparency = ColorPicker.Transparency }
-        end,
-        function(Element: any?, Data: any)
-            if not Element then return end
-            
-            Element:SetValueRGB(Color3.fromHex(Data.value), Data.transparency)
+CreateParser(
+    "ColorPicker", "Options",
+    function(Index: string, ColorPicker: any)
+        return { value = ColorPicker.Value:ToHex(), transparency = ColorPicker.Transparency }
+    end,
+    function(Element: any?, Data: any)
+        if not Element then return end
+        
+        Element:SetValueRGB(Color3.fromHex(Data.value), Data.transparency)
+    end
+)
+CreateParser(
+    "KeyPicker", "Options",
+    function(Index: string, KeyPicker: any)
+        return { mode = KeyPicker.Mode, key = KeyPicker.Value, modifiers = KeyPicker.Modifiers, toggled = KeyPicker.Toggled }
+    end,
+    function(Element: any?, Data: any)
+        if not Element then return end
+        
+        Element:SetValue({ Data.key, Data.mode, Data.modifiers })
+        if Data.mode == "Toggle" and Data.toggled ~= nil then
+            Element.Toggled = Data.toggled
+            Element:Update()
         end
-    )
-     CreateParser(
-        "KeyPicker", "Options",
-        function(Index: string, KeyPicker: any)
-            return { mode = KeyPicker.Mode, key = KeyPicker.Value, modifiers = KeyPicker.Modifiers, toggled = KeyPicker.Toggled }
-        end,
-        function(Element: any?, Data: any)
-            if not Element then return end
-            
-            Element:SetValue({ Data.key, Data.mode, Data.modifiers })
-            if Data.mode == "Toggle" and Data.toggled ~= nil then
-                Element.Toggled = Data.toggled
-                Element:Update()
+    end
+)
+
+CreateParser(
+    "Input", "Options",
+    function(Index: string, Input: any)
+        return { text = Input.Value }
+    end,
+    function(Element: any?, Data: any)
+        if not Element then return end
+        if typeof(Data.text) ~= "string" then return end
+
+        if Element.Value == Data.text then
+            Element:RunChanged()
+            return
+        end
+
+        Element:SetValue(Data.text)
+    end
+)
+
+CreateParser(
+    "Groupbox", "Tabs",
+    function(Index: string, Groupbox: any, TabIndex: string)
+        return {
+            tabIdx = TabIndex,
+            collapsed = Groupbox.Collapsed,
+            poppedOut = Groupbox.PoppedOut == true,
+            popoutPos = if Groupbox.PoppedOut and Groupbox.PopOutFloat then SpecialValueParser.UDim2.Encode(Groupbox.PopOutFloat.Position) else nil,
+        }
+    end,
+    function(_, Data: any)
+        local TabIndex, Index = Data.tabIdx, Data.idx
+        if typeof(TabIndex) ~= "string" or typeof(Index) ~= "string" then return end
+
+        local Tabs = SaveManager.Library and SaveManager.Library.Tabs
+        local Tab = Tabs and Tabs[TabIndex]
+        if not Tab then return end
+
+        local Groupbox = Tab.Groupboxes[Index]
+        if not Groupbox then return end
+
+        if Groupbox.Collapsed ~= Data.collapsed then
+            Groupbox:SetCollapsed(Data.collapsed == true)
+        end
+
+        if Groupbox.PopOutEnabled then
+            if Data.poppedOut == true then
+                local Position = SpecialValueParser.UDim2.Decode(Data.popoutPos)
+                Groupbox:SetPoppedOut(true, Position)
+            elseif Groupbox.PoppedOut then
+                Groupbox:SetPoppedOut(false)
             end
         end
-    )
-
-    CreateParser(
-        "Input", "Options",
-        function(Index: string, Input: any)
-            return { text = Input.Value }
-        end,
-        function(Element: any?, Data: any)
-            if not Element then return end
-            if typeof(Data.text) ~= "string" then return end
-
-            if Element.Value == Data.text then
-                Element:RunChanged()
-                return
-            end
-
-            Element:SetValue(Data.text)
-        end
-    )
-
-    CreateParser(
-        "Groupbox", "Tabs",
-        function(Index: string, Groupbox: any, TabIndex: string)
-            return {
-                tabIdx = TabIndex,
-                collapsed = Groupbox.Collapsed,
-                poppedOut = Groupbox.PoppedOut == true,
-                popoutPos = if Groupbox.PoppedOut and Groupbox.PopOutFloat then SpecialValueParser.UDim2.Encode(Groupbox.PopOutFloat.Position) else nil,
-            }
-        end,
-        function(_, Data: any)
-            local TabIndex, Index = Data.tabIdx, Data.idx
-            if typeof(TabIndex) ~= "string" or typeof(Index) ~= "string" then return end
-
-            local Tabs = SaveManager.Library and SaveManager.Library.Tabs
-            local Tab = Tabs and Tabs[TabIndex]
-            if not Tab then return end
-
-            local Groupbox = Tab.Groupboxes[Index]
-            if not Groupbox then return end
-
-            if Groupbox.Collapsed ~= Data.collapsed then
-                Groupbox:SetCollapsed(Data.collapsed == true)
-            end
-
-            if Groupbox.PopOutEnabled then
-                if Data.poppedOut == true then
-                    local Position = SpecialValueParser.UDim2.Decode(Data.popoutPos)
-                    Groupbox:SetPoppedOut(true, Position)
-                elseif Groupbox.PoppedOut then
-                    Groupbox:SetPoppedOut(false)
-                end
-            end
-        end,
-        true
-    )
-
+    end,
+    true
+)
     CreateParser(
         "Tabbox", "Tabs",
         function(Index: string, Tabbox: any, TabIndex: string)
@@ -259,7 +257,8 @@ local ElementParser = {}; do
         true
     )
 end
- local function Trim(Text: string)
+
+local function Trim(Text: string)
     return Text:match("^%s*(.-)%s*$")
 end
 
@@ -286,8 +285,7 @@ local function SplitPath(Path: string): {string}
 
     return Result
 end
-
-local function GetFolderPath(): false | string
+ local function GetFolderPath(): false | string
     if IsStringEmpty(SaveManager.Folder) then
         return false
     end
@@ -327,8 +325,7 @@ function SaveManager:SetLoadingOrder(Enabled: boolean, Order: {string}?)
     SaveManager.UseLoadingOrder = Enabled == true
     SaveManager.LoadingOrder = typeof(Order) == "table" and Order or SaveManager.LoadingOrder
 end
-
-function SaveManager:SetIgnoreIndexes(Indexes: {string}?)
+ function SaveManager:SetIgnoreIndexes(Indexes: {string}?)
     assert(typeof(Indexes) == "table", "Expected table, got " .. typeof(Indexes))
 
     for _, Index in Indexes do
@@ -377,8 +374,7 @@ end
 function SaveManager:CheckFolderTree()
     return SaveManager:BuildFolderTree(true)
 end
-
-function SaveManager:CheckSubFolder(CreateFolder: boolean)
+ function SaveManager:CheckSubFolder(CreateFolder: boolean)
     local SubFolderPath = GetSubFolderPath()
     if SubFolderPath == false then
         return false
@@ -406,7 +402,8 @@ function SaveManager:SetSubFolder(SubFolder: string)
     SaveManager.SubFolder = SubFolder
     SaveManager:BuildFolderTree()
 end
- function SaveManager:RefreshConfigList()
+
+function SaveManager:RefreshConfigList()
     local SettingsPath = GetCurrentSettingsPath()
     if SettingsPath == false then
         return {}
@@ -432,8 +429,7 @@ end
 
     return FileNames
 end
-
-function SaveManager:SaveJSON(ConfigName)
+ function SaveManager:SaveJSON(ConfigName)
     local Library = SaveManager.Library
     local IgnoreIndexes = SaveManager.Ignore
     local CurrentData = {
@@ -640,8 +636,7 @@ function SaveManager:GetAutoloadConfig(): (string, boolean, string?)
     SaveManager.AutoloadConfig = AutoloadConfigName
     return AutoloadConfigName, true
 end
-
-function SaveManager:SaveAutoloadConfig(ConfigName: string): (boolean, string?)
+ function SaveManager:SaveAutoloadConfig(ConfigName: string): (boolean, string?)
     if IsStringEmpty(ConfigName) then
         return false, "未选择配置"
     end
@@ -767,176 +762,174 @@ function SaveManager:BuildConfigSection(Tab: any, IconName: string)
         AutoloadConfigLabel:SetText(string.format("当前自动加载配置：%s", AutoloadConfigName))
         if ConfigList then RefreshList() end
     end
+ ConfigurationBox:AddInput("SaveManager_ConfigName", {
+    Text = "配置名称"
+})
 
-    ConfigurationBox:AddInput("SaveManager_ConfigName", {
-        Text = "配置名称"
-    })
+ConfigurationBox:AddButton("创建配置", function()
+    local ConfigName = ConfigNameInput.Value
+    if IsStringEmpty(ConfigName) then
+        SaveManager.Library:Notify("配置名称不能为空。")
+        return
+    end
 
-    ConfigurationBox:AddButton("创建配置", function()
-        local ConfigName = ConfigNameInput.Value
+    if string.lower(ConfigName) == "autoload" then
+        SaveManager.Library:Notify("提供的配置名称无效。")
+        return
+    end
+    
+    ShowDialog(
+        function(): boolean
+            return DoesConfigExist(ConfigName)
+        end,
+
+        "SaveManager_CreateConfig",
+        "配置已存在",
+        string.format("名为 %q 的配置已存在。覆盖将用当前设置替换它。", ConfigName),
+
+        "覆盖",
+        function()
+            local Success, ErrorMessage = SaveManager:Save(ConfigName)
+            if not Success then
+                SaveManager.Library:Notify(string.format("创建配置 %q 失败：%s", ConfigName, ErrorMessage))
+                return
+            end
+
+            SaveManager.Library:Notify(string.format("成功创建配置 %q", ConfigName))
+            RefreshList()
+        end
+    )
+end)
+
+ConfigurationBox:AddDivider()
+
+ConfigurationBox:AddDropdown("SaveManager_ConfigList", {
+    Text = "配置列表",
+
+    Values = SaveManager:RefreshConfigList(),
+    AllowNull = true,
+    Multi = false,
+
+    FormatDisplayValue = function(Value: any)
+        if Value == SaveManager.AutoloadConfig then
+            return string.format("%s (自动加载)", Value)
+        end
+
+        return Value
+    end,
+    FormatListValue = function(Value: any)
+        if Value == SaveManager.AutoloadConfig then
+            return string.format("%s (自动加载)", Value)
+        end
+
+        return Value
+    end
+})
+
+ConfigurationBox:AddButton({
+    Text = "加载配置",
+    DoubleClick = false,
+
+    Func = function()
+        local ConfigName = ConfigList.Value
         if IsStringEmpty(ConfigName) then
-            SaveManager.Library:Notify("配置名称不能为空。")
+            SaveManager.Library:Notify("请先选择一个配置。")
             return
         end
 
-        if string.lower(ConfigName) == "autoload" then
-            SaveManager.Library:Notify("提供的配置名称无效。")
-            return
-        end
-        
         ShowDialog(
             function(): boolean
-                return DoesConfigExist(ConfigName)
+                return true
             end,
 
-            "SaveManager_CreateConfig",
-            "配置已存在",
-            string.format("名为 %q 的配置已存在。覆盖将用当前设置替换它。", ConfigName),
+            "SaveManager_LoadConfig",
+            "加载配置",
+            string.format("确定要加载 %q 吗？当前设置将被覆盖。", ConfigName),
+
+            "加载",
+            function()
+                local Success, ErrorMessage = SaveManager:Load(ConfigName)
+                if not Success then
+                    SaveManager.Library:Notify(string.format("加载配置 %q 失败：%s", ConfigName, ErrorMessage))
+                    return
+                end
+
+                SaveManager.Library:Notify(string.format("成功加载配置 %q", ConfigName))
+            end
+        )
+    end
+})
+ConfigurationBox:AddButton({
+    Text = "覆盖配置",
+    DoubleClick = false,
+
+    Func = function()
+        local ConfigName = ConfigList.Value
+        if IsStringEmpty(ConfigName) then
+            SaveManager.Library:Notify("请先选择一个配置。")
+            return
+        end
+
+        ShowDialog(
+            function(): boolean
+                return true
+            end,
+
+            "SaveManager_OverwriteConfig",
+            "覆盖配置",
+            string.format("确定要用当前设置覆盖 %q 吗？此操作不可撤销。", ConfigName),
 
             "覆盖",
             function()
                 local Success, ErrorMessage = SaveManager:Save(ConfigName)
                 if not Success then
-                    SaveManager.Library:Notify(string.format("创建配置 %q 失败：%s", ConfigName, ErrorMessage))
+                    SaveManager.Library:Notify(string.format("覆盖配置 %q 失败：%s", ConfigName, ErrorMessage))
                     return
                 end
 
-                SaveManager.Library:Notify(string.format("成功创建配置 %q", ConfigName))
-                RefreshList()
+                SaveManager.Library:Notify(string.format("成功覆盖配置 %q", ConfigName))
             end
         )
-    end)
+    end
+})
 
-    ConfigurationBox:AddDivider()
+ConfigurationBox:AddButton({
+    Text = "删除配置",
+    DoubleClick = false,
 
-    ConfigurationBox:AddDropdown("SaveManager_ConfigList", {
-        Text = "配置列表",
-
-        Values = SaveManager:RefreshConfigList(),
-        AllowNull = true,
-        Multi = false,
-
-        FormatDisplayValue = function(Value: any)
-            if Value == SaveManager.AutoloadConfig then
-                return string.format("%s (自动加载)", Value)
-            end
-
-            return Value
-        end,
-        FormatListValue = function(Value: any)
-            if Value == SaveManager.AutoloadConfig then
-                return string.format("%s (自动加载)", Value)
-            end
-
-            return Value
+    Func = function()
+        local ConfigName = ConfigList.Value
+        if IsStringEmpty(ConfigName) then
+            SaveManager.Library:Notify("请先选择一个配置。")
+            return
         end
-    })
 
-    ConfigurationBox:AddButton({
-        Text = "加载配置",
-        DoubleClick = false,
+        ShowDialog(
+            function(): boolean
+                return true
+            end,
 
-        Func = function()
-            local ConfigName = ConfigList.Value
-            if IsStringEmpty(ConfigName) then
-                SaveManager.Library:Notify("请先选择一个配置。")
-                return
-            end
-
-            ShowDialog(
-                function(): boolean
-                    return true
-                end,
-
-                "SaveManager_LoadConfig",
-                "加载配置",
-                string.format("确定要加载 %q 吗？当前设置将被覆盖。", ConfigName),
-
-                "加载",
-                function()
-                    local Success, ErrorMessage = SaveManager:Load(ConfigName)
-                    if not Success then
-                        SaveManager.Library:Notify(string.format("加载配置 %q 失败：%s", ConfigName, ErrorMessage))
-                        return
-                    end
-
-                    SaveManager.Library:Notify(string.format("成功加载配置 %q", ConfigName))
+            "SaveManager_DeleteConfig",
+            "删除配置",
+            string.format("确定要删除 %q 吗？此操作不可撤销。", ConfigName),
+            
+            "删除",
+            function()
+                local Success, ErrorMessage = SaveManager:Delete(ConfigName)
+                if not Success then
+                    SaveManager.Library:Notify(string.format("删除配置 %q 失败：%s", ConfigName, ErrorMessage))
+                    return
                 end
-            )
-        end
-    })
-    
-    ConfigurationBox:AddButton({
-        Text = "覆盖配置",
-        DoubleClick = false,
 
-        Func = function()
-            local ConfigName = ConfigList.Value
-            if IsStringEmpty(ConfigName) then
-                SaveManager.Library:Notify("请先选择一个配置。")
-                return
+                SaveManager.Library:Notify(string.format("成功删除配置 %q", ConfigName))
+                RefreshAutoloadConfigLabel()
             end
+        )
+    end
+})
 
-            ShowDialog(
-                function(): boolean
-                    return true
-                end,
-
-                "SaveManager_OverwriteConfig",
-                "覆盖配置",
-                string.format("确定要用当前设置覆盖 %q 吗？此操作不可撤销。", ConfigName),
-
-                "覆盖",
-                function()
-                    local Success, ErrorMessage = SaveManager:Save(ConfigName)
-                    if not Success then
-                        SaveManager.Library:Notify(string.format("覆盖配置 %q 失败：%s", ConfigName, ErrorMessage))
-                        return
-                    end
-
-                    SaveManager.Library:Notify(string.format("成功覆盖配置 %q", ConfigName))
-                end
-            )
-        end
-    })
-
-    ConfigurationBox:AddButton({
-        Text = "删除配置",
-        DoubleClick = false,
-
-        Func = function()
-            local ConfigName = ConfigList.Value
-            if IsStringEmpty(ConfigName) then
-                SaveManager.Library:Notify("请先选择一个配置。")
-                return
-            end
-
-            ShowDialog(
-                function(): boolean
-                    return true
-                end,
-
-                "SaveManager_DeleteConfig",
-                "删除配置",
-                string.format("确定要删除 %q 吗？此操作不可撤销。", ConfigName),
-                
-                "删除",
-                function()
-                    local Success, ErrorMessage = SaveManager:Delete(ConfigName)
-                    if not Success then
-                        SaveManager.Library:Notify(string.format("删除配置 %q 失败：%s", ConfigName, ErrorMessage))
-                        return
-                    end
-
-                    SaveManager.Library:Notify(string.format("成功删除配置 %q", ConfigName))
-                    RefreshAutoloadConfigLabel()
-                end
-            )
-        end
-    })
-
-    ConfigurationBox:AddButton("刷新列表", RefreshList)
- ConfigurationBox:AddButton({
+ConfigurationBox:AddButton("刷新列表", RefreshList)
+ConfigurationBox:AddButton({
     Text = "设为自动加载",
     DoubleClick = false,
 
@@ -990,7 +983,6 @@ ConfigurationBox:AddButton({
 AutoloadConfigLabel = ConfigurationBox:AddLabel("当前自动加载配置：...", true);
 
 ConfigurationBox:AddDivider()
-
 ConfigurationBox:AddInput("SaveManager_JSON", {
     Text = "配置 JSON"
 })
