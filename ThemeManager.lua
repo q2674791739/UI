@@ -1,4 +1,3 @@
--- 原作者: deividcomsono (https://github.com/deividcomsono/Obsidian) 汉化修改版本
 local cloneref = (cloneref or clonereference or function(instance) return instance end)
 local clonefunction = (clonefunction or copyfunction or function(func) return func end)
 local HttpService = cloneref(game:GetService("HttpService"))
