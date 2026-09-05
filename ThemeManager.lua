@@ -339,8 +339,8 @@ function ThemeManager:CreateThemeManager(Themesbox)
 
     local function CreateColorOption(Text, SchemeIndex) Themesbox:AddLabel(Text):AddColorPicker(SchemeIndex, { Default = ThemeManager.Library.Scheme[SchemeIndex] }) return ThemeManager.Library.Options[SchemeIndex] end
     local BackgroundColor = CreateColorOption("背景颜色", "BackgroundColor")
-    local MainColor = CreateColorOption("主颜色", "MainColor")
-    local AccentColor = CreateColorOption("强调色", "AccentColor")
+    local MainColor = CreateColorOption("按钮颜色", "MainColor")
+    local AccentColor = CreateColorOption("图标颜色", "AccentColor")
     local OutlineColor = CreateColorOption("轮廓颜色", "OutlineColor")
     local FontColor = CreateColorOption("字体颜色", "FontColor")
 
@@ -511,7 +511,7 @@ function ThemeManager:CreateThemeManager(Themesbox)
     return Themesbox
 end
 
-function ThemeManager:CreateGroupBox(Tab, IconName) return Tab:AddGroupbox({ Side = "Left", Name = "主题", IconName = IconName or "paintbrush" }) end
+function ThemeManager:CreateGroupBox(Tab, IconName) return Tab:AddGroupbox({ Side = "Left", Name = "主题",  }) end
 function ThemeManager:ApplyToTab(Tab, IconName) local Groupbox = ThemeManager:CreateGroupBox(Tab, IconName) return ThemeManager:CreateThemeManager(Groupbox) end
 function ThemeManager:ApplyToGroupbox(Groupbox) return ThemeManager:CreateThemeManager(Groupbox) end
 getgenv().ObsidianThemeManager = ThemeManager
