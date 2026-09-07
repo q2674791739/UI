@@ -537,7 +537,7 @@ local Templates = {
         DisabledValues = {},
         ValueImages = {},
 
-        Multi = true,
+        Multi = false,
         DragSelect = false,
         MaxVisibleDropdownItems = 8,
 
