@@ -1,7 +1,4 @@
-#这是一个免费的开源的关于各种UI的中文汉化仓库
+#这里是免费开源的关于各种UI的汉化版仓库
 
-#感谢各种UI作者提供的源码
+#感谢每个UI作者公开的源码
 
-#A free and open-source repository for Chinese translations of various UI libraries.
-
-#Thanks to the authors of various UI libraries for providing the source code.
