@@ -15,8 +15,8 @@ return function()
         SaveManager = loadstring(game:HttpGet(BaseUrl .. "SaveManager.lua"))(),
         ThemeManager = loadstring(game:HttpGet(BaseUrl .. "ThemeManager.lua"))(),
 
-        ApplyInfoTab = loadstring(game:HttpGet(AbysallUrl .. "Components/InfoTab.luau"))(),
-        ApplySettingsTab = loadstring(game:HttpGet(AbysallUrl .. "Components/SettingsTab.luau"))()
+        ApplyInfoTab = loadstring(game:HttpGet(AbysallUrl .. "InfoTab.luau"))(),
+        ApplySettingsTab = loadstring(game:HttpGet(AbysallUrl .. "SettingsTab.luau"))()
     }
 
     Interface.ThemeManager.BuiltInThemes = {
