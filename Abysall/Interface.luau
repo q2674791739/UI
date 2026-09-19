@@ -15,7 +15,7 @@ local Interface = {
     ThemeManager = loadstring(game:HttpGet(BaseUrl .. "ThemeManager.lua"))(),
 
     ApplyInfoTab = loadstring(game:HttpGet(AbysallUrl .. "InfoTab.luau"))(),
-    ApplySettingsTab = loadstring(game:HttpGet(AbysallUrl .. "SettingsTab.luau"))()
+    ApplySettingsTab = loadstring(game:HttpGet(AbysallUrl .. "SettingsTab.luau"))(),
     ApplyEntertainmentTab = loadstring(game:HttpGet(AbysallUrl .. "Entertainment.luau"))(),
 }
 
