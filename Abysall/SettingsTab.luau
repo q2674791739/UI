@@ -37,25 +37,6 @@ return function(Window)
             Library.ShowCustomCursor = Value
         end,
     })
-
-    MenuGroup:AddDropdown("UILibrary", {
-    Text = "UI 风格",
-    Values = { "Obsidian", "Linoria" },
-    Default = (Abysall.UILibrary == "Linoria" and 2 or 1),
-    Callback = function(Value)
-        if Abysall.Environment.writefile and Abysall.Environment.readfile then
-            if not Abysall.Environment.isfile("Abysall/UserData.json") then
-                Abysall.Environment.writefile("Abysall/UserData.json", Services.HttpService:JSONEncode({TotalExecutions = 0, UILibrary = "Obsidian"}))
-            end
-            local Data = Abysall.Environment.readfile("Abysall/UserData.json")
-            local Decoded = Services.HttpService:JSONDecode(Data)
-            Decoded.UILibrary = Value
-            Abysall.UILibrary = Decoded.UILibrary
-            Abysall.Environment.writefile("Abysall/UserData.json", Services.HttpService:JSONEncode(Decoded))
-        end
-        Library:Notify("已切换为 " .. Value .. "，请大退游戏后重新进以生效", 4)
-    end,
-})
     
     MenuGroup:AddDropdown("DPIDropdown", {
         Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
