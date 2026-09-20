@@ -16,7 +16,6 @@ local Interface = {
 
     ApplyInfoTab = loadstring(game:HttpGet(AbysallUrl .. "InfoTab.luau"))(),
     ApplySettingsTab = loadstring(game:HttpGet(AbysallUrl .. "SettingsTab.luau"))(),
-    ApplyEntertainmentTab = loadstring(game:HttpGet(AbysallUrl .. "Entertainment.luau"))(),
 }
 
 Interface.ThemeManager.BuiltInThemes = {
