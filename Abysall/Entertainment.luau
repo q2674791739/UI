@@ -3,7 +3,8 @@ return function(Window)
     local Library = Abysall.Interface.Library
     local Toggles = Library.Toggles
     local Options = Library.Options
-
+    local Globals = getgenv().Globals
+    
     local EntertainmentTab = Window:AddTab("娱乐", "music")
     local MusicBox = EntertainmentTab:AddLeftGroupbox("音乐播放器")
 
