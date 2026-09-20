@@ -39,37 +39,15 @@ return function(Window)
     })
 
     MenuGroup:AddDropdown("UILibrary", {
-        Text = "UI 风格",
-        Values = {
-            "Obsidian",
-            "Linoria"
-        },
-        Default = (Abysall.UILibrary == "Linoria" and 2 or 1),
-        Callback = function(Value)
-            if Abysall.Environment.writefile and Abysall.Environment.readfile then
-                if not Abysall.Environment.isfile("Abysall/UserData.json") then
-                    local Data = {
-                        TotalExecutions = 0,
-                        UILibrary = "Obsidian"
-                    }
-                    Abysall.Environment.writefile("Abysall/UserData.json", Services.HttpService:JSONEncode(Data))
-                end
-
-                local UserData = Abysall.Environment.readfile("Abysall/UserData.json")
-                local Decoded = Services.HttpService:JSONDecode(UserData)
-                Decoded.UILibrary = Value
-
-                if not Decoded.UILibrary then
-                    Decoded.UILibrary = "Obsidian"
-                end
-
-                Abysall.TotalExecutions = Decoded.TotalExecutions
-                Abysall.UILibrary = Decoded.UILibrary
-
-                Abysall.Environment.writefile("Abysall/UserData.json", Services.HttpService:JSONEncode(Decoded))
-            end
-        end
-    })
+    Text = "UI 风格",
+    Values = { "Obsidian", "Linoria" },
+    Default = (getgenv().Abysall.UILibrary == "Linoria" and 2 or 1), -- 读取内存变量
+    Callback = function(Value)
+        getgenv().Abysall.UILibrary = tostring(Value) -- 👈 直接写进内存
+        Abysall.UILibrary = tostring(Value)           -- 同步给当前实例
+        Library:Notify("已切换为 " .. Value .. "，请卸载脚本后重新执行以生效", 4)
+    end,
+})
     
     MenuGroup:AddDropdown("DPIDropdown", {
         Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
