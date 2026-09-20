@@ -2,13 +2,7 @@ local ObsidianUrl = "https://raw.githubusercontent.com/Q2674791739/UI/main/Obsid
 local LinoriaUrl = "https://raw.githubusercontent.com/Q2674791739/UI/main/Linoria/"
 local AbysallUrl = "https://raw.githubusercontent.com/Q2674791739/UI/main/Abysall/"
 
-local TargetLib = Abysall.UILibrary --  确保这里读的是 Abysall.UILibrary
-local BaseUrl
-if TargetLib == "Linoria" then
-    BaseUrl = LinoriaUrl
-else
-    BaseUrl = ObsidianUrl
-end
+local BaseUrl = ObsidianUrl
 
 local Interface = {
     Library = loadstring(game:HttpGet(BaseUrl .. "Library.lua"))(),
